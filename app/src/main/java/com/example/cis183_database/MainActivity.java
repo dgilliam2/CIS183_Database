@@ -1,5 +1,6 @@
 package com.example.cis183_database;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -18,7 +19,8 @@ public class MainActivity extends AppCompatActivity
     DatabaseHelper dbHelper;
     EditText et_j_main_userId;
     Button btn_j_main_login;
-    TextView tv_j_userFname;
+    TextView tv_j_error;
+    Intent intent_j_welcome;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,7 +31,7 @@ public class MainActivity extends AppCompatActivity
         //setup GUI connections
         et_j_main_userId = findViewById(R.id.et_v_main_userId);
         btn_j_main_login = findViewById(R.id.btn_v_main_login);
-        tv_j_userFname   = findViewById(R.id.tv_v_main_userFname);
+        tv_j_error   = findViewById(R.id.tv_v_main_error);
 
         //make a new instance of the dbHelper.
         dbHelper = new DatabaseHelper(this);
@@ -37,6 +39,8 @@ public class MainActivity extends AppCompatActivity
         //initialize all of the tables with dummy data
         //there is login in this function to ensure this is not done more than once.
         dbHelper.initAllTables();
+
+        intent_j_welcome = new Intent(MainActivity.this, WelcomeScreen.class);
 
         //Just used for testing
         checkAllTableCounts();
@@ -60,10 +64,17 @@ public class MainActivity extends AppCompatActivity
                 int enteredId = Integer.parseInt(et_j_main_userId.getText().toString());
                 //set the session data so we know who is logged int
                 //this is important so we only show posts written by a specific person
-                SessionData.setLoggedInUserId(enteredId);
                 //get the first name associated with this userid if it exists
-                String userFName = dbHelper.getFNameForUser(enteredId);
-                tv_j_userFname.setText(userFName);
+                dbHelper.getUserGivenId(enteredId);
+                if (SessionData.getLoggedInUser() != null)
+                {
+                    startActivity(intent_j_welcome);
+                }
+                else
+                {
+                    tv_j_error.setVisibility(View.VISIBLE);
+                    tv_j_error.setText("Error: User ID Invalid");
+                }
             }
         });
     }

@@ -21,7 +21,7 @@ public class DatabaseHelper extends SQLiteOpenHelper
         //super is sued to call the functionality of the base class SQLiteOpenHelper and
         //then executes the extended (DatabaseHelper)
 
-        super(c,database_name,null,2);
+        super(c,database_name,null,3);
     }
     @Override
     public void onCreate(SQLiteDatabase db)
@@ -100,15 +100,15 @@ public class DatabaseHelper extends SQLiteOpenHelper
             //|1 - Zackary|2 - Shannon|3 - Gabriel|4 - Harrison|5 - Tito|6 - Willow|
             //When a user posts the userId will populate automatically based off who which user made the post
 
-            db.execSQL("INSERT INTO " + posts_table_name + "(userId, category, postData) VALUES (1, 'Technology', 'This is my first post about technology.  I am posting about my new computer.');");
+            db.execSQL("INSERT INTO " + posts_table_name + "(userId, category, postData) VALUES (1, 'Reading', 'I like reading');");
             db.execSQL("INSERT INTO " + posts_table_name + "(userId, category, postData) VALUES (2, 'Gardening', 'I love gardening.  This is my first post about gardening.');");
             db.execSQL("INSERT INTO " + posts_table_name + "(userId, category, postData) VALUES (2, 'Gardening', 'Corn.  This year I got a bunch of differnet types of corn to grow in my garden.');");
             db.execSQL("INSERT INTO " + posts_table_name + "(userId, category, postData) VALUES (3, 'Baeball', 'I love baseball.  I am playing cathcer, pitch, and outfield.  I got a few homeruns this year');");
             db.execSQL("INSERT INTO " + posts_table_name + "(userId, category, postData) VALUES (3, 'Gaming', 'Videogames are so fun.  My favorite videogame right now is Good Job.');");
             db.execSQL("INSERT INTO " + posts_table_name + "(userId, category, postData) VALUES (4, 'Cartoons', 'Bluey is the best cartoon in the World!  I could watch it all day if my parents let me.');");
             db.execSQL("INSERT INTO " + posts_table_name + "(userId, category, postData) VALUES (5, 'Squirrels', 'I hate squirrels!');");
-            db.execSQL("INSERT INTO " + posts_table_name + "(userId, category, postData) VALUES (6, 'Squirrels', 'I love squirrels!');");
-            db.execSQL("INSERT INTO " + posts_table_name + "(userId, category, postData) VALUES (1, 'Teaching', 'I enjoy teaching my students about Software Engineering');");
+            db.execSQL("INSERT INTO " + posts_table_name + "(userId, category, postData) VALUES (2, 'Writing', 'Writing is boring');");
+            db.execSQL("INSERT INTO " + posts_table_name + "(userId, category, postData) VALUES (6, 'Writing', 'I enjoy writing');");
 
 
             db.close();
@@ -206,5 +206,48 @@ public class DatabaseHelper extends SQLiteOpenHelper
         {
             return false;
         }
+    }
+
+    public void getUserGivenId(int id)
+    {
+        User loggedInUser = null;
+        if(userIdExists(id)) {
+            loggedInUser = new User();
+            SQLiteDatabase db = this.getReadableDatabase();
+
+            String select = "SELECT * FROM " + users_table_name + " WHERE userId = '" + id + "';";
+            Cursor cursor = db.rawQuery(select, null);
+
+            if (cursor != null) {
+                cursor.moveToFirst();
+                loggedInUser.setUser_id(cursor.getInt(0));
+                loggedInUser.setFname(cursor.getString(1));
+                loggedInUser.setLname(cursor.getString(2));
+                loggedInUser.setEmail(cursor.getString(3));
+                cursor.close();
+                SessionData.setLoggedInUser(loggedInUser);
+            }
+        }
+        else
+        {
+            SessionData.setLoggedInUser(null);
+        }
+    }
+
+    public int getUserPostsGivenId(int id)
+    {
+        int count = 0;
+        if(userIdExists(id))
+        {
+            SQLiteDatabase db = this.getReadableDatabase();
+            String select = "SELECT userId FROM " + posts_table_name + " WHERE userId = '" + id + "';";
+            Cursor cursor = db.rawQuery(select, null);
+            if (cursor != null)
+            {
+                count = cursor.getCount();
+                cursor.close();
+            }
+        }
+        return count;
     }
 }
